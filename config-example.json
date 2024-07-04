@@ -1,0 +1,13 @@
+{
+    "telegram": {
+        "bot_token": "TELEGRAM_BOT_API_TOKEN",
+        "chat_id": "TELEGRAM_CHAT_ID"
+    },
+    "github": {
+        "webhook_secret": "GITHUB_WEBHOOK_SECRET"
+    },
+    "ssl": {
+        "cert": "CERT_FILE_PATH",
+        "key": "KEY_FILE_PATH"
+    }
+}
