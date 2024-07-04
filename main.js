@@ -18,8 +18,8 @@ const webhooks = new Webhooks({
 const app = express();
 
 const messageOptions = {
-    parse_mode: 'MarkdownV2',
-    link_preview_options: { is_disabled: true }
+    parse_mode: 'HTML',
+    disable_web_page_preview: true
 }
 
 app.use((req, res, next) => {
@@ -44,17 +44,13 @@ async function handlePost(req, res) {
     }
     if(!(await webhooks.verify(data, sign))) {
         console.log('Signature incorrect');
-        //res.status(401).send('Unauthorized');
-        //return;
+        res.status(401).send('Unauthorized');
+        return;
     }
     const message = parseData(data);
     res.status(200).send('OK');
     bot.sendMessage(config.telegram.chat_id, message, messageOptions);
 }
-
-app.get('/test', (req, res) => {
-    res.send('Hello HTTPS!\n')
-});
 
 https.createServer(keypair, app).listen(8009, () => {
     console.log('Server is listening 8009');
