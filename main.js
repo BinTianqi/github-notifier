@@ -38,6 +38,7 @@ app.post('/', handlePost);
 async function handlePost(req, res) {
     const data = req.body;
     const sign = req.headers['x-hub-signature-256'];
+    const gh_event = req.headers['x-github-event'];
     if(typeof(sign) == 'undefined') {
         res.status(401).send('Unauthorized');
         return;
@@ -47,7 +48,7 @@ async function handlePost(req, res) {
         res.status(401).send('Unauthorized');
         return;
     }
-    const message = parseData(data);
+    const message = parseData(gh_event, data);
     res.status(200).send('OK');
     bot.sendMessage(config.telegram.chat_id, message, messageOptions);
 }
