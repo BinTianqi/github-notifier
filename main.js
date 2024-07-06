@@ -50,7 +50,7 @@ async function handlePost(req, res) {
     }
     const message = parseData(gh_event, data);
     res.status(200).send('OK');
-    bot.sendMessage(config.telegram.chat_id, message, messageOptions);
+    await bot.sendMessage(config.telegram.chat_id, message, messageOptions);
 }
 
 https.createServer(keypair, app).listen(8009, () => {
