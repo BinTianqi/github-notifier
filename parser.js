@@ -33,6 +33,7 @@ export function parseData(gh_event, dataStr) {
         if(action === 'created') { result += `Author: <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'edited') { result += `Edited by: <a href="${sender.html_url}">${sender.login}</a>`; }
         else { result += `Deleted by: <a href="${sender.html_url}">${sender.login}</a>`; }
+        return result;
     } else if (gh_event === 'pull_request') {
         const pr = data.pull_request;
         const title = escapeChar(pr.title);
@@ -129,8 +130,9 @@ export function parseData(gh_event, dataStr) {
     } else if (gh_event === 'fork') {
         const forkee = data.forkee;
         return `<b>New fork</b>\n<a href="${forkee.html_url}">${forkee.owner.login}/${forkee.name}</a>`;
-    } else {}
-    return `<i>Unhandled event: ${gh_event}</i>`;
+    } else {
+        return `<i>Unhandled event: ${gh_event}</i>`;
+    }
 }
 
 function escapeChar(str) {
