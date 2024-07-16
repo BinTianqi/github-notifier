@@ -21,7 +21,6 @@ export function parseData(gh_event, dataStr) {
         else if (action === 'opened') { result += `Author: <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'edited') { result += `Edited by <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'closed') { result += `Closed by <a href="${sender.html_url}">${sender.login}</a>`; }
-        return result;
     } else if (gh_event === 'issue_comment') {
         const issue = data.issue;
         const comment = data.comment;
@@ -37,7 +36,9 @@ export function parseData(gh_event, dataStr) {
         const pr = data.pull_request;
         const title = escapeChar(pr.title);
         if(action === 'opened') {
-            return `<b>New pull request</b>\n<a href="${pr.html_url}">#${pr.number}</a> ${title}\nAuthor: <a href="${sender.html_url}">${sender.login}</a>`;
+            result += `<b>New pull request</b>\n`;
+            result += `<a href="${pr.html_url}">#${pr.number}</a> ${title}\n`;
+            result += `Author: <a href="${sender.html_url}">${sender.login}</a>`;
         }
     } else if (gh_event === 'push') {
         result = `<b>New push</b>\n`;
@@ -53,7 +54,6 @@ export function parseData(gh_event, dataStr) {
                 result += msg;
             }
         });
-        return result;
     } else if (gh_event === 'workflow_run') {
         const wfr = data.workflow_run;
         if(action === 'requested') { result += `<b>Workflow run requested</b>\n`;
@@ -71,7 +71,6 @@ export function parseData(gh_event, dataStr) {
             result += `Time spent: ${parseTimeMs(timeMs)}\n`
         }
         result += `By: <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
     } else if (gh_event === 'workflow_job') {
         const wfj = data.workflow_job;
         if(action === 'waiting') { result += `<b>Workflow job waiting</b>\n`; }
@@ -86,7 +85,6 @@ export function parseData(gh_event, dataStr) {
             result += `Time spent: ${parseTimeMs(timeMs)}\n`
         }
         result += `By: <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
     } else if (gh_event === 'check_run') {
         const cr = data.check_run;
         if(action === 'created') { result += `<b>Check run created</b>\n`; }
@@ -101,7 +99,6 @@ export function parseData(gh_event, dataStr) {
             result += `Time spent: ${parseTimeMs(timeMs)}\n`
         }
         result += `By: <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
     } else if (gh_event === 'check_suite') {
         const cs = data.check_suite;
         if(action === 'completed') { result += `<b>Check suite completed</b>\n`; }
@@ -112,25 +109,31 @@ export function parseData(gh_event, dataStr) {
         const timeMs = Date.parse(cs.updated_at) - Date.parse(cs.created_at);
         result += `Time spent: ${parseTimeMs(timeMs)}\n`
         result += `By: <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
     } else if (gh_event === 'create') {
         if(data.ref_type === 'branch') { result += `<b>New branch</b>\n`; }
         else { result += `<b>New tag</b>\n`; }
         result += `ref: ${data.ref}\n`
         result += `Created by: <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
     } else if (gh_event === 'star') {
         if(action === 'created') { result += `<b>New star</b>\n`; }
         else { result += `<b>Star deleted</b>\n`; }
-        result += `By <a href="${sender.html_url}">${sender.login}</a>`;
-        return result;
+        result += `By <a href="${sender.html_url}">${sender.login}</a>\n`;
+        result += `Total stargazers: ${data.repository.stargazers_count}`;
     } else if (gh_event === 'watch') {
-        return `<b>New watcher</b>\n<a href="${sender.html_url}">${sender.login}</a>`;
+        result += `<b>New watcher</b>\n`;
+        result += `<a href="${sender.html_url}">${sender.login}</a>\n`;
+        result += `Total watchers: ${data.repository.watchers_count}`;
     } else if (gh_event === 'fork') {
         const forkee = data.forkee;
-        return `<b>New fork</b>\n<a href="${forkee.html_url}">${forkee.owner.login}/${forkee.name}</a>`;
-    } else {}
-    return `<i>Unhandled event: ${gh_event}</i>`;
+        result += `<b>New fork</b>\n`;
+        result += `<a href="${forkee.html_url}">${forkee.owner.login}/${forkee.name}</a>`;
+    } else {
+        if (result !== '') {
+            return result;
+        } else {
+            return `<i>Unhandled event: ${gh_event}</i>`;
+        }
+    }
 }
 
 function escapeChar(str) {
