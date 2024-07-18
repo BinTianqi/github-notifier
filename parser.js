@@ -32,6 +32,38 @@ export function parseData(gh_event, dataStr) {
         if(action === 'created') { result += `Author: <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'edited') { result += `Edited by: <a href="${sender.html_url}">${sender.login}</a>`; }
         else { result += `Deleted by: <a href="${sender.html_url}">${sender.login}</a>`; }
+    } else if(gh_event === 'discussion') {
+        const discussion = data.discussion;
+        if(action === 'labeled') { result += `<b>New discussion label</b>\n`; }
+        else if (action === 'unlabeled') { result += `<b>Discussion label removed</b>\n`; }
+        else if (action === 'created') { result += `<b>New discussion</b>\n`; }
+        else if (action === 'edited') { result += `<b>Discussion edited</b>\n`; }
+        else if (action === 'closed') { result += `<b>Discussion closed</b>\n`; }
+        else if (action === 'reopened') { result += `<b>Discussion reopened</b>\n`; }
+        else if (action === 'deleted') { result += `<b>Discussion deleted</b>\n`; }
+        else if (action === 'answered') { result += `<b>Discussion answered</b>\n`; }
+        else if (action === 'unanswered') { result += `<b>Discussion unanswered</b>\n`; }
+        else if (action === 'locked') { result += `<b>Discussion locked</b>\n`; }
+        else if (action === 'unlocked') { result += `<b>Discussion unlocked</b>\n`; }
+        else if (action === 'pinned') { result += `<b>Discussion pinned</b>\n`; }
+        else if (action === 'unpinned') { result += `<b>Discussion unpinned</b>\n`; }
+        else if (action === 'transferred') { result += `<b>Discussion transferred</b>\n`; }
+        else { result += `<b>Discussion category changed</b>\n`; }
+        result += `<a href="${discussion.html_url}">#${discussion.number}</a> ${escapeChar(discussion.title)}\n`;
+        if(action === 'labeled' || action === 'unlabeled') { result += `Label: ${escapeChar(data.label.name)}\n`; }
+        if(action === 'answered') { result += `Answer id: <a href="${data.answer.html_url}">${data.answer.id}</a>\n` }
+        if(action === 'unanswered') { result += `Answer id: <a href="${data.old_answer.html_url}">${data.old_answer.id}</a>\n` }
+        if(action === 'created' || action === 'category_changed') { result += `Category: <a href="${discussion.category.html_url}">${discussion.category.name}</a>\n`; }
+        result += `By <a href="${sender.html_url}">${sender.login}</a>`;
+    } else if (gh_event === 'discussion_comment') {
+        const discussion = data.discussion;
+        const comment = data.comment;
+        if(action === 'created') { result += `<b>New discussion comment</b>\n`; }
+        else if (action === 'edited') { result += `<b>Discussion comment edited</b>\n`; }
+        else { result += `<b>Discussion comment deleted</b>\n`; }
+        result += `<a href="${discussion.html_url}">#${discussion.number}</a> ${escapeChar(discussion.title)}\n`;
+        result += `Comment id: <a href="${comment.html_url}">${comment.id}</a>\n`;
+        result += `By: <a href="${sender.html_url}">${sender.login}</a>`;
     } else if (gh_event === 'pull_request') {
         const pr = data.pull_request;
         if(action === 'opened') { result += `<b>New pull request</b>\n`; }
