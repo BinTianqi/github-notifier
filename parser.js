@@ -15,9 +15,9 @@ export function parseData(gh_event, dataStr) {
         else if (action === 'opened') { result += `<b>New issue</b>\n`; }
         else if (action === 'edited') { result += `<b>Issue edited</b>\n`; }
         else if (action === 'closed') { result += `<b>Issue closed</b>\n`; }
-        result += `<a href="${issue.html_url}">#${issue.number}</a> ${issue.title}\n`;
-        if(action === 'labeled') { result += `Label: ${data.label.name}\nBy <a href="${sender.html_url}">${sender.login}</a>`; }
-        else if (action === 'unlabeled') { result += `Label: ${data.label.name}\nBy <a href="${sender.html_url}">${sender.login}</a>`; }
+        result += `<a href="${issue.html_url}">#${issue.number}</a> ${escapeChar(issue.title)}\n`;
+        if(action === 'labeled') { result += `Label: ${escapeChar(data.label.name)}\nBy <a href="${sender.html_url}">${sender.login}</a>`; }
+        else if (action === 'unlabeled') { result += `Label: ${escapeChar(data.label.name)}\nBy <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'opened') { result += `Author: <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'edited') { result += `Edited by <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'closed') { result += `Closed by <a href="${sender.html_url}">${sender.login}</a>`; }
@@ -27,19 +27,39 @@ export function parseData(gh_event, dataStr) {
         if(action === 'created') { result += `<b>New issue comment</b>\n`; }
         else if (action === 'edited') { result += `<b>Issue comment edited</b>\n`; }
         else { result += `<b>Issue comment deleted</b>\n`; }
-        result += `<a href="${issue.html_url}">#${issue.number}</a> ${issue.title}\n`;
+        result += `<a href="${issue.html_url}">#${issue.number}</a> ${escapeChar(issue.title)}\n`;
         result += `Comment id: <a href="${comment.html_url}">${comment.id}</a>\n`
         if(action === 'created') { result += `Author: <a href="${sender.html_url}">${sender.login}</a>`; }
         else if (action === 'edited') { result += `Edited by: <a href="${sender.html_url}">${sender.login}</a>`; }
         else { result += `Deleted by: <a href="${sender.html_url}">${sender.login}</a>`; }
     } else if (gh_event === 'pull_request') {
         const pr = data.pull_request;
-        const title = escapeChar(pr.title);
-        if(action === 'opened') {
-            result += `<b>New pull request</b>\n`;
-            result += `<a href="${pr.html_url}">#${pr.number}</a> ${title}\n`;
-            result += `Author: <a href="${sender.html_url}">${sender.login}</a>`;
-        }
+        if(action === 'opened') { result += `<b>New pull request</b>\n`; }
+        else if (action === 'closed') { result += `<b>Pull request closed</b>\n`; }
+        else if (action === 'reopened') { result += `<b>Pull request reopened</b>\n`; }
+        else if (action === 'edited') { result += `<b>Pull request edited</b>\n`; }
+        else if (action === 'assigned') { result += `<b>Pull request assigned</b>\n`; }
+        else if (action === 'unassigned') { result += `<b>Pull request unassigned</b>\n`; }
+        else if (action === 'enqueued') { result += `<b>Pull request enqueued</b>\n`; }
+        else if (action === 'dequeued') { result += `<b>Pull request dequeued</b>\n`; }
+        else if (action === 'milestoned') { result += `<b>Pull request milestoned</b>\n`; }
+        else if (action === 'demilestoned') { result += `<b>Pull request demilestoned</b>\n`; }
+        else if (action === 'labeled') { result += `<b>Pull request labeled</b>\n`; }
+        else if (action === 'unlabeled') { result += `<b>Pull request unlabeled</b>\n`; }
+        else if (action === 'converted_to_draft') { result += `<b>Pull request converted to draft</b>\n`; }
+        else if (action === 'ready_for_review') { result += `<b>Pull request ready for review</b>\n`; }
+        else if (action === 'locked') { result += `<b>Pull request locked</b>\n`; }
+        else if (action === 'unlocked') { result += `<b>Pull request unlocked</b>\n`; }
+        else if (action === 'review_requested') { result += `<b>Pull request requested review</b>\n`; }
+        else if (action === 'review_request_removed') { result += `<b>Pull request review request removed</b>\n`; }
+        else if (action === 'auto_merge_disabled') { result += `<b>Pull request auto merge disabled</b>\n`; }
+        else if (action === 'auto_merge_enabled') { result += `<b>Pull request auto merge enabled</b>\n`; }
+        else { result += `<b>Pull request synchronized</b>\n`; }
+        result += `<a href="${pr.html_url}">#${pr.number}</a> ${escapeChar(pr.title)}\n`;
+        if (action === 'assigned' || action === 'unassigned') { result += `Assignee: <a href="${data.assignee.html_url}">${data.assignee.login}</a>>\n`; }
+        if (action === 'milestoned' || action === 'demilestoned') { result += `Milestone: <a href="${data.milestone.html_url}">${escapeChar(data.milestone.label)}</a>\n`; }
+        if (action === 'labeled' || action === 'unlabeled') { result += `Label: ${escapeChar(data.label.name)}\n`; }
+        result += `By <a href="${sender.html_url}">${sender.login}</a>`;
     } else if (gh_event === 'push') {
         result = `<b>New push</b>\n`;
         result += `ref: ${data.ref}\n`;
@@ -128,11 +148,12 @@ export function parseData(gh_event, dataStr) {
         result += `<b>New fork</b>\n`;
         result += `<a href="${forkee.html_url}">${forkee.owner.login}/${forkee.name}</a>`;
     } else {
-        if (result !== '') {
-            return result;
-        } else {
-            return `<i>Unhandled event: ${gh_event}</i>`;
-        }
+        return `<i>Unhandled event: ${gh_event}</i>`;
+    }
+    if (result !== '') {
+        return result;
+    } else {
+        return `<i>Unhandled event: ${gh_event}</i>`;
     }
 }
 

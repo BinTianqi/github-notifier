@@ -48,9 +48,15 @@ async function handlePost(req, res) {
         res.status(401).send('Unauthorized');
         return;
     }
-    const message = parseData(gh_event, data);
-    res.status(200).send('OK');
-    await bot.sendMessage(config.telegram.chat_id, message, messageOptions);
+    let message = '';
+    try {
+        message = parseData(gh_event, data);
+        await bot.sendMessage(config.telegram.chat_id, message, messageOptions);
+        res.status(200).send('OK');
+    } catch (error) {
+        console.log(error);
+        await bot.sendMessage(config.telegram.chat_id, '<i>An error occurred</i>', messageOptions);
+    }
 }
 
 https.createServer(keypair, app).listen(8009, () => {
