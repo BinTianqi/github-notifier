@@ -101,7 +101,7 @@ export function parseData(gh_event, dataStr) {
             result += `\n<a href="${commit.url}">${commit.id.substring(0, 8)}</a> `;
             const msg = escapeChar(commit.message);
             if(msg.indexOf('\n') !== -1) {
-                result += msg.substring(0, msg.indexOf('\n')+1);
+                result += msg.substring(0, msg.indexOf('\n'));
             } else {
                 result += msg;
             }
@@ -165,7 +165,30 @@ export function parseData(gh_event, dataStr) {
         if(data.ref_type === 'branch') { result += `<b>New branch</b>\n`; }
         else { result += `<b>New tag</b>\n`; }
         result += `ref: ${data.ref}\n`
-        result += `Created by: <a href="${sender.html_url}">${sender.login}</a>`;
+        result += `Created by <a href="${sender.html_url}">${sender.login}</a>`;
+    } else if (gh_event === 'delete') {
+        if(data.ref_type === 'branch') { result += `<b>Branch deleted</b>\n`; }
+        else { result += `<b>Tag deleted</b>\n`; }
+        result += `ref: ${data.ref}\n`
+        result += `By <a href="${sender.html_url}">${sender.login}</a>`;
+    } else if (gh_event === 'release') {
+        const release = data.release;
+        if(data.action === 'created') { result += `<b>Release created</b>\n`; }
+        else if (data.action === 'deleted') { result += `<b>Release deleted</b>\n`; }
+        else if (data.action === 'published') { result += `<b>Release published</b>\n`; }
+        else if (data.action === 'unpublished') { result += `<b>Release unpublished</b>\n`; }
+        else if (data.action === 'release') { result += `<b>Release</b>\n`; }
+        else if (data.action === 'pre-released') { result += `<b>Pre-release</b>\n`; }
+        else { result += `<b>Release edited</b>\n`; }
+        result += `${release.name}\n`;
+        result += `id: <a href="${release.html_url}">${release.id}</a>\n`;
+        result += `Draft: ${release.draft}\n`;
+        result += `Pre-release: ${release.prerelease}\n`;
+        result += `By <a href="${sender.html_url}">${sender.login}</a>\n`;
+        result += `${release.assets.length} assets:`;
+        release.assets.forEach(asset => {
+            result += `\n<a href="${asset.browser_download_url}">${asset.name}</a>`;
+        });
     } else if (gh_event === 'star') {
         if(action === 'created') { result += `<b>New star</b>\n`; }
         else { result += `<b>Star deleted</b>\n`; }
