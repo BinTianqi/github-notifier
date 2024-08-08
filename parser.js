@@ -4,7 +4,7 @@ export function parseData(gh_event, dataStr) {
     try {
         data = JSON.parse(dataStr);
     } catch (error) {
-        return 'Failed to parse data';
+        return `Failed to parse data\n${error}`;
     }
     const sender = data.sender;
     const action = data.action;
@@ -88,7 +88,7 @@ export function parseData(gh_event, dataStr) {
         else if (action === 'auto_merge_enabled') { result += `<b>Pull request auto merge enabled</b>\n`; }
         else { result += `<b>Pull request synchronized</b>\n`; }
         result += `<a href="${pr.html_url}">#${pr.number}</a> ${escapeChar(pr.title)}\n`;
-        if (action === 'assigned' || action === 'unassigned') { result += `Assignee: <a href="${data.assignee.html_url}">${data.assignee.login}</a>>\n`; }
+        if (action === 'assigned' || action === 'unassigned') { result += `Assignee: <a href="${data.assignee.html_url}">${data.assignee.login}</a>\n`; }
         if (action === 'milestoned' || action === 'demilestoned') { result += `Milestone: <a href="${data.milestone.html_url}">${escapeChar(data.milestone.label)}</a>\n`; }
         if (action === 'labeled' || action === 'unlabeled') { result += `Label: ${escapeChar(data.label.name)}\n`; }
         result += `By <a href="${sender.html_url}">${sender.login}</a>`;
@@ -202,6 +202,9 @@ export function parseData(gh_event, dataStr) {
         const forkee = data.forkee;
         result += `<b>New fork</b>\n`;
         result += `<a href="${forkee.html_url}">${forkee.owner.login}/${forkee.name}</a>`;
+    } else if (gh_event === 'ping') {
+        result += `<b>Hello webhook!\n</b>`;
+        result += `<i>${data.zen}</i>\n`;
     } else {
         return `<i>Unhandled event: ${gh_event}</i>`;
     }

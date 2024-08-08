@@ -3,24 +3,17 @@ import fs from 'fs';
 import https from 'https';
 import { Webhooks } from '@octokit/webhooks';
 import { parseData } from './parser.js';
-import TGbot from 'node-telegram-bot-api';
-import config from './config.json' with { type: 'json' };
+import config from './config.js';
 
 const keypair = {
     key: fs.readFileSync(config.ssl.key),
     cert: fs.readFileSync(config.ssl.cert)
 };
-const bot = new TGbot(config.telegram.bot_token, { polling: false });
 const webhooks = new Webhooks({
     secret: config.github.webhook_secret
 })
 
 const app = express();
-
-const messageOptions = {
-    parse_mode: 'HTML',
-    disable_web_page_preview: true
-}
 
 app.use((req, res, next) => {
     let str = '';
@@ -51,15 +44,34 @@ async function handlePost(req, res) {
     let message = '';
     try {
         message = parseData(gh_event, data);
-        await bot.sendMessage(config.telegram.chat_id, message, messageOptions);
+        sendMessage(message)
         res.status(200).send('OK');
     } catch (error) {
         console.log(error);
-        await bot.sendMessage(config.telegram.chat_id, '<i>An error occurred</i>', messageOptions);
+        sendMessage('<i>An error occurred</i>')
     }
+}
+
+function sendMessage(message) {
+    let data = {
+        chat_id: config.telegram.chat_id,
+        text: message,
+        parse_mode: "HTML",
+        link_preview_options: {
+            is_disabled: true
+        }
+    };
+    fetch(`https://api.telegram.org/bot${config.telegram.bot_token}/sendMessage`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    }).then(res => {
+        return res.statusCode;
+    })
 }
 
 https.createServer(keypair, app).listen(8009, () => {
     console.log('Server is listening 8009');
 });
-
