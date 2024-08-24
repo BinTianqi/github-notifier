@@ -3,6 +3,7 @@ import fs from 'fs';
 import https from 'https';
 import { Webhooks } from '@octokit/webhooks';
 import { parseData } from './parser.js';
+import { sendMessage } from "./main.js";
 import config from './config.js';
 
 const keypair = {
@@ -44,32 +45,11 @@ async function handlePost(req, res) {
     let message = '';
     try {
         message = parseData(gh_event, data);
-        sendMessage(message)
+        sendMessage(message, config.telegram.chat_id, config.telegram.bot_token)
         res.status(200).send('OK');
     } catch (error) {
         console.log(error);
-        sendMessage('<i>An error occurred</i>')
     }
-}
-
-function sendMessage(message) {
-    let data = {
-        chat_id: config.telegram.chat_id,
-        text: message,
-        parse_mode: "HTML",
-        link_preview_options: {
-            is_disabled: true
-        }
-    };
-    fetch(`https://api.telegram.org/bot${config.telegram.bot_token}/sendMessage`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    }).then(res => {
-        return res.statusCode;
-    })
 }
 
 https.createServer(keypair, app).listen(8009, () => {
