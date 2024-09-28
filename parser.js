@@ -13,9 +13,9 @@ export function parseData(gh_event, dataStr) {
         const issue = data.issue
         result += `<b>Issue ${action}</b>\n`
         result += `<a href="${issue.html_url}">#${issue.number} ${escapeChar(issue.title)}</a>\n`
-        if(action === 'locked') result += `Reason: ${issue.active_lock_reason}`
-        if(action === 'closed') result += `Reason: ${issue.state_reason}`
-        if(action.includes('milestone')) result += `Milestone: ${escapeChar(data.milestone.title)}`
+        if(action === 'locked') result += `Reason: ${issue.active_lock_reason}\n`
+        if(action === 'closed') result += `Reason: ${issue.state_reason}\n`
+        if(action.includes('milestone')) result += `Milestone: ${escapeChar(data.milestone.title)}\n`
         if(action.includes('label')) result += `Label: ${escapeChar(data.label.name)}\n`
     } else if (gh_event === 'issue_comment') {
         const issue = data.issue
@@ -58,6 +58,11 @@ export function parseData(gh_event, dataStr) {
             })
             result += '</blockquote>'
         }
+    } else if (gh_event === 'commit_comment') {
+        const comment = data.comment
+        result += `<b>Commit comment ${action}</b>\n`
+        result += `On commit ${comment.commit_id}\n`
+        result += `Comment id: <a href="${comment.html_url}">${comment.id}</a>\n`
     } else if (gh_event === 'workflow_run') {
         const wfr = data.workflow_run
         result += `<b>Workflow run ${action.replaceAll('_', ' ')}</b>\n`
@@ -120,6 +125,15 @@ export function parseData(gh_event, dataStr) {
             })
             result += '</blockquote>'
         }
+    } else if (gh_event === 'label') {
+        const label = data.label
+        result += `<b>Label ${action}</b>\n`
+        result += `Name: ${escapeChar(label.name)}\n`
+        result += `Color: #${label.color}\n`
+    } else if (gh_event === 'milestone') {
+        const milestone = data.milestone
+        result += `<b>Milestone ${action}</b>\n`
+        result += `<a href="${milestone.html_url}">${milestone.title}</a>\n`
     } else if (gh_event === 'star') {
         result += `<b>Star ${action}</b> by <a href="${sender.html_url}">${sender.login}</a>\n`
         result += `Total stargazers: ${data.repository.stargazers_count}`
@@ -132,13 +146,18 @@ export function parseData(gh_event, dataStr) {
         result += `<b>New fork</b>\n`
         result += `<a href="${forkee.html_url}">${sender.login}/${data.forkee.name}</a>`
         noBy = true
-    } else if (gh_event === 'ping') {
-        result += `<b>Ping</b>\n`
-        result += `Active: ${data.hook.active}\n`
-        result += `Events:`
-        hook.events.forEach(hookEvent => {
-            result += ' ' + hookEvent
-        })
+    } else if (gh_event === 'repository_ruleset') {
+        const ruleset = data.repository_ruleset
+        result += `<b>Repository ruleset ${action}</b>\n`
+        result += `Name: ${ruleset.name}\n`
+        result += `Target: ${ruleset.target}\n`
+        result += `Enforcement: ${ruleset.enforcement}\n`
+    } else if (gh_event === 'ping' || gh_event === 'meta') {
+        const hook = data.hook
+        result += `<b>Hello webhook</b>\n`
+        result += `Name: ${hook.name}\n`
+        resuly += `Type: ${hook.type}\n`
+        result += `Active: ${hook.active}\n`
     } else {
         return `<i>Unhandled event: ${gh_event}</i>`
     }
