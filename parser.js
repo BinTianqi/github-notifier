@@ -156,7 +156,7 @@ export function parseData(gh_event, dataStr) {
         const hook = data.hook
         result += `<b>Hello webhook</b>\n`
         result += `Name: ${hook.name}\n`
-        resuly += `Type: ${hook.type}\n`
+        result += `Type: ${hook.type}\n`
         result += `Active: ${hook.active}\n`
     } else {
         return `<i>Unhandled event: ${gh_event}</i>`

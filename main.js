@@ -17,3 +17,4 @@ export async function sendMessage(message, chatId, botToken) {
     const res = await fetched.json()
     return res
 }
+

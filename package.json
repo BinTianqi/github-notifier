@@ -1,8 +1,5 @@
 {
   "type": "module",
-  "dependencies": {
-    "@octokit/webhooks": "^13.2.7"
-  },
   "devDependencies": {
     "express": "^4.19.2"
   }

@@ -1,21 +1,21 @@
 import { parseData } from "./parser.js";
 import { sendMessage } from "./main.js";
-import { Webhooks } from '@octokit/webhooks';
+import verifySignature from "./verify.js"
 
 export default {
     async fetch(req, env, ctx) {
         let status = 500;
         let response = "";
         const payload = await req.text();
-        const sign = req.headers.get('X-Hub-Signature-256')
+        const signature = req.headers.get('X-Hub-Signature-256')
         const gh_event = req.headers.get('X-GitHub-Event')
-        if(sign == null) {
+        if(signature == null) {
             status = 401;
             response += "Signature not found in headers";
         } else {
             try {
-                const webhook = new Webhooks({ secret: env.WEBHOOK_SECRET })
-                if((await webhook.verify(payload, sign))) {
+                const verified = await verifySignature(env.WEBHOOK_SECRET, signature, payload)
+                if(verified) {
                     const message = parseData(gh_event, payload);
                     console.log(message)
                     const result = await sendMessage(message, env.CHAT_ID, env.BOT_TOKEN);
