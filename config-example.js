@@ -6,9 +6,10 @@ export default {
     github: {
         webhook_secret: "GITHUB_WEBHOOK_SECRET"
     },
-    ssl: {
+    ssl: { // Delete 'ssl' block to use HTTP mode
         cert: "your_cert.pem",
         key: "your_fullchain.pem"
-    }
+    },
+    port: 8080
 }
 

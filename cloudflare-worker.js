@@ -1,4 +1,4 @@
-import { parseData } from "./parser.js";
+import parseData from "./parser.js";
 import { sendMessage } from "./main.js";
 import verifySignature from "./verify.js"
 
